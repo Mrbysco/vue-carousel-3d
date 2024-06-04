@@ -324,8 +324,17 @@ export default {
       }
 
       this.mousedown = true
-      this.dragStartX = ('ontouchstart' in window) ? e.touches[0].clientX : e.clientX
-      this.dragStartY = ('ontouchstart' in window) ? e.touches[0].clientY : e.clientY
+      this.dragStartX = e.clientX
+      this.dragStartY = e.clientY
+
+     if (e.type != "mousedown") {
+        if(('ontouchstart' in window) ||
+            (navigator.maxTouchPoints > 0) ||
+            (navigator.msMaxTouchPoints > 0)) {
+              this.dragStartX = e.touches[0].clientX
+              this.dragStartY = e.touches[0].clientY
+        }
+      }
     },
     /**
      * Trigger actions when mouse is pressed and then moved (mouse drag)
@@ -336,8 +345,18 @@ export default {
         return
       }
 
-      const eventPosX = ('ontouchstart' in window) ? e.touches[0].clientX : e.clientX
-      const eventPosY = ('ontouchstart' in window) ? e.touches[0].clientY : e.clientY
+      let eventPosX = e.clientX
+      let eventPosY = e.clientY
+      if (e.type != "mousemove") {
+        if(('ontouchstart' in window) ||
+            (navigator.maxTouchPoints > 0) ||
+            (navigator.msMaxTouchPoints > 0)) {
+          eventPosX = e.touches[0].clientX
+          eventPosY = e.touches[0].clientY
+        }
+      }
+
+
       const deltaX = (this.dragStartX - eventPosX)
       const deltaY = (this.dragStartY - eventPosY)
 
@@ -433,15 +452,14 @@ export default {
       this.attachMutationObserver()
       window.addEventListener('resize', this.setSize)
 
-      if ('ontouchstart' in window) {
+      if ((('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0))) {
         this.$el.addEventListener('touchstart', this.handleMousedown)
         this.$el.addEventListener('touchend', this.handleMouseup)
         this.$el.addEventListener('touchmove', this.handleMousemove)
-      } else {
+      }
         this.$el.addEventListener('mousedown', this.handleMousedown)
         this.$el.addEventListener('mouseup', this.handleMouseup)
         this.$el.addEventListener('mousemove', this.handleMousemove)
-      }
     }
   },
 
@@ -449,7 +467,7 @@ export default {
     if (!process.server) {
       this.detachMutationObserver()
 
-      if ('ontouchstart' in window) {
+      if ((('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0))) {
         this.$el.removeEventListener('touchmove', this.handleMousemove)
       } else {
         this.$el.removeEventListener('mousemove', this.handleMousemove)
